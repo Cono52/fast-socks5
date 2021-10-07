@@ -6,7 +6,7 @@ use async_std::net::TcpListener;
 use async_std::sync::Arc;
 use async_std::{future::Future, stream::StreamExt, task};
 use fast_socks5::{
-    server::{Config, SimpleUserPassword, Socks5Server, Socks5Socket},
+    server::{Config, SimpleUserPassword, Socks5Socket},
     Result,
 };
 use futures::{AsyncRead, AsyncWrite};
@@ -82,7 +82,7 @@ async fn spawn_socks_server() -> Result<()> {
 
     let config = Arc::new(config);
 
-    let mut listener = TcpListener::bind(&opt.listen_addr).await?;
+    let listener = TcpListener::bind(&opt.listen_addr).await?;
     //    listener.set_config(config);
 
     let mut incoming = listener.incoming();

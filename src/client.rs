@@ -95,16 +95,16 @@ where
     /// Altogether, then the server choose to use of of these,
     /// or deny the handshake (thus the connection).
     ///
-    /// # Examples
-    ///
-    ///                    {SOCKS Version, methods-length}
-    ///     eg. (non-auth) {5, 2}
-    ///     eg. (auth)     {5, 3}
-    ///
     async fn send_version_and_methods(
         &mut self,
         methods: Vec<AuthenticationMethod>,
     ) -> Result<Vec<AuthenticationMethod>> {
+        // # Examples
+        //
+        //                    {SOCKS Version, methods-length}
+        //     eg. (non-auth) {5, 2}
+        //     eg. (auth)     {5, 3}
+        //
         debug!(
             "Send version and method len [{}, {}]",
             consts::SOCKS5_VERSION,
@@ -131,21 +131,21 @@ where
     /// Decide to whether or not, accept the authentication method.
     /// Don't forget that the methods list sent by the client, contains one or more methods.
     ///
-    /// # Request
-    ///
-    ///  Client send an array of 3 entries: [0, 1, 2]
-    ///
-    ///                          {SOCKS Version,  Authentication chosen}
-    ///     eg. (non-auth)       {5, 0}
-    ///     eg. (GSSAPI)         {5, 1}
-    ///     eg. (auth)           {5, 2}
-    ///
-    /// # Response
-    ///
-    ///     eg. (accept non-auth) {5, 0x00}
-    ///     eg. (non-acceptable)  {5, 0xff}
-    ///
     async fn which_method_accepted(&mut self, methods: Vec<AuthenticationMethod>) -> Result<()> {
+        // # Request
+        //
+        //  Client send an array of 3 entries: [0, 1, 2]
+        //
+        //     {SOCKS Version,  Authentication chosen}
+        //     eg. (non-auth)       {5, 0}
+        //     eg. (GSSAPI)         {5, 1}
+        //     eg. (auth)           {5, 2}
+        //
+        // # Response
+        //
+        //     eg. (accept non-auth) {5, 0x00}
+        //     eg. (non-acceptable)  {5, 0xff}
+        //
         let [version, method] =
             read_exact!(self.socket, [0u8; 2]).context("Can't get chosen auth method")?;
         debug!(
@@ -233,25 +233,20 @@ where
     /// Decide to whether or not, accept the authentication method.
     /// Don't forget that the methods list sent by the client, contains one or more methods.
     ///
-    /// # Request
-    ///
-    ///          +----+-----+-------+------+----------+----------+
-    ///          |VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
-    ///          +----+-----+-------+------+----------+----------+
-    ///          | 1  |  1  |   1   |  1   | Variable |    2     |
-    ///          +----+-----+-------+------+----------+----------+
-    ///
-    ///
     /// # Help
     ///
     /// To debug request use a netcat server with hexadecimal output to parse the hidden bytes:
     ///
-    /// ```
-    ///    $ nc -k -l 80 | hexdump -C
+    /// ```ignore
+    /// nc -k -l 80 | hexdump -C
     /// ```
     ///
     async fn request_header(&mut self) -> Result<()> {
         let mut packet = [0u8; MAX_ADDR_LEN + 3];
+        // Request:
+        // | VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
+        // |-----|-----|-------|------|----------|----------|
+        // |  1  |  1  |   1   |  1   | Variable |    2     |
         let padding; // maximum len of the headers sent
                      // build our request packet with (socks version, Command, reserved)
         packet[..3].copy_from_slice(&[

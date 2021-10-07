@@ -218,20 +218,14 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Socks5Socket<T> {
     }
 
     /// Read the authentication method provided by the client.
-    /// A client send a list of methods that he supports, he could send
+    /// A client provides a list of methods that they support, they could send
     ///
     ///   - 0: Non auth
     ///   - 2: Auth with username/password
     ///
-    /// Altogether, then the server choose to use of of these,
+    /// Altogether, the server chooses to use one of these,
     /// or deny the handshake (thus the connection).
-    ///
-    /// # Examples
-    ///
-    ///                    {SOCKS Version, methods-length}
-    ///     eg. (non-auth) {5, 2}
-    ///     eg. (auth)     {5, 3}
-    ///
+    /// 
     async fn get_methods(&mut self) -> Result<Vec<u8>> {
         trace!("Socks5Socket: get_methods()");
         // read the first 2 bytes which contains the SOCKS version and the methods len()
@@ -258,24 +252,24 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Socks5Socket<T> {
         Ok(methods)
     }
 
-    /// Decide to whether or not, accept the authentication method.
-    /// Don't forget that the methods list sent by the client, contains one or more methods.
+    /// Decide to whether or not to accept the authentication method.
     ///
-    /// # Request
-    ///
-    ///  Client send an array of 3 entries: [0, 1, 2]
-    ///
-    ///                          {SOCKS Version,  Authentication chosen}
-    ///     eg. (non-auth)       {5, 0}
-    ///     eg. (GSSAPI)         {5, 1}
-    ///     eg. (auth)           {5, 2}
-    ///
-    /// # Response
-    ///     
-    ///     eg. (accept non-auth) {5, 0x00}
-    ///     eg. (non-acceptable)  {5, 0xff}
-    ///
+    /// Don't forget that the methods list sent by the client contains one or more methods.
     async fn can_accept_method(&mut self, client_methods: Vec<u8>) -> Result<()> {
+        // # Request
+        //
+        //  Client send an array of 3 entries: [0, 1, 2]
+        //
+        //                          {SOCKS Version,  Authentication chosen}
+        //     eg. (non-auth)       {5, 0}
+        //     eg. (GSSAPI)         {5, 1}
+        //     eg. (auth)           {5, 2}
+        //
+        // # Response
+        //     
+        //     eg. (accept non-auth) {5, 0x00}
+        //     eg. (non-acceptable)  {5, 0xff}
+        //
         let method_supported;
 
         if self.config.auth.is_some() {
@@ -419,17 +413,17 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Socks5Socket<T> {
     /// Decide to whether or not, accept the authentication method.
     /// Don't forget that the methods list sent by the client, contains one or more methods.
     ///
-    /// # Request
-    ///
-    ///          +----+-----+-------+------+----------+----------+
-    ///          |VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
-    ///          +----+-----+-------+------+----------+----------+
-    ///          | 1  |  1  |   1   |  1   | Variable |    2     |
-    ///          +----+-----+-------+------+----------+----------+
-    ///
     /// It the request is correct, it should returns a ['SocketAddr'].
     ///
     async fn read_command(&mut self) -> Result<()> {
+        // # Request
+        //
+        // +----+-----+-------+------+----------+----------+
+        // |VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
+        // +----+-----+-------+------+----------+----------+
+        // | 1  |  1  |   1   |  1   | Variable |    2     |
+        // +----+-----+-------+------+----------+----------+
+        //
         let [version, cmd, rsv, address_type] =
             read_exact!(self.inner, [0u8; 4]).context("Malformed request")?;
         debug!(
