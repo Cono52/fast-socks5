@@ -635,11 +635,11 @@ where
 mod test {
     use crate::server::Socks5Server;
 
-    #[test]
-    fn test_bind() {
+    #[async_std::test]
+    async fn test_bind() {
         //dza
         async {
-            let server = Socks5Server::bind("127.0.0.1:1080").await.unwrap();
-        };
+            let _server = Socks5Server::bind("127.0.0.1:1080").await.unwrap();
+        }.await;
     }
 }
